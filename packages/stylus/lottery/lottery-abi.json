@@ -1,0 +1,44 @@
+warning: variable `_callbackGasLimit` should have a snake case name
+  --> src/lib.rs:65:53
+   |
+65 |         function calculateRequestPriceNative(uint32 _callbackGasLimit, uint32 _numWords) external view returns (uint256);
+   |                                                     ^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `_callback_gas_limit`
+   |
+   = note: `#[warn(non_snake_case)]` on by default
+
+warning: variable `_numWords` should have a snake case name
+  --> src/lib.rs:65:79
+   |
+65 |         function calculateRequestPriceNative(uint32 _callbackGasLimit, uint32 _numWords) external view returns (uint256);
+   |                                                                               ^^^^^^^^^ help: convert the identifier to snake case: `_num_words`
+
+warning: variable `_callbackGasLimit` should have a snake case name
+  --> src/lib.rs:67:20
+   |
+67 |             uint32 _callbackGasLimit,
+   |                    ^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `_callback_gas_limit`
+
+warning: variable `_requestConfirmations` should have a snake case name
+  --> src/lib.rs:68:20
+   |
+68 |             uint16 _requestConfirmations,
+   |                    ^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `_request_confirmations`
+
+warning: variable `_numWords` should have a snake case name
+  --> src/lib.rs:69:20
+   |
+69 |             uint32 _numWords,
+   |                    ^^^^^^^^^ help: convert the identifier to snake case: `_num_words`
+
+warning: variable `extraArgs` should have a snake case name
+  --> src/lib.rs:70:28
+   |
+70 |             bytes calldata extraArgs
+   |                            ^^^^^^^^^ help: convert the identifier to snake case: `extra_args`
+
+Warning: SPDX license identifier not provided in source file. Before publishing, consider adding a comment containing "SPDX-License-Identifier: <SPDX-License>" to each source file. Use "SPDX-License-Identifier: UNLICENSED" for non-open-source code. Please see https://spdx.org for more information.
+--> <stdin>
+
+Warning: Source file does not specify required compiler version! Consider adding "pragma solidity ^0.8.31;"
+--> <stdin>
+

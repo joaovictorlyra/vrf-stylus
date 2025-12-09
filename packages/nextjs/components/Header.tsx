@@ -31,6 +31,11 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/vrf",
     icon: <ArrowPathIcon className="h-4 w-4" />,
   },
+  {
+    label: "Lottery",
+    href: "/lottery",
+    icon: <span className="text-base">🎰</span>,
+  },
 ];
 
 export const HeaderMenuLinks = () => {

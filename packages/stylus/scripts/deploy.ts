@@ -29,7 +29,7 @@ export default async function deployScript(deployOptions: DeployOptions) {
   console.log(`📁 Deployment directory: ${config.deploymentDir}`);
   console.log(`\n`);
 
-  // Deploy a single contract
+  // Deploy VRF Consumer contract
   await deployStylusContract({
     contract: "vrf-consumer",
     constructorArgs: [
@@ -38,6 +38,18 @@ export default async function deployScript(deployOptions: DeployOptions) {
     ],
     ...deployOptions,
   });
+
+  // Deploy SimpleLottery contract (simplified version - 1.3KB)
+  // After deployment, call init(vrfWrapper, entryFee, owner) to initialize
+  await deployStylusContract({
+    contract: "lottery",
+    ...deployOptions,
+  });
+
+  console.log("\n⚠️  Remember to call init() on the lottery contract:");
+  console.log(`   - VRF Wrapper: 0x29576aB8152A09b9DC634804e4aDE73dA1f3a3CC`);
+  console.log(`   - Entry Fee: 0.01 ETH (10000000000000000 wei)`);
+  console.log(`   - Owner: ${config.deployerAddress}`);
 
   // EXAMPLE: Deploy to Orbit Chains, uncomment to try
   // await deployStylusContract({

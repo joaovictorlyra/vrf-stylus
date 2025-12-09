@@ -1,20 +1,42 @@
 import React from "react";
 import Link from "next/link";
 
-interface CardProps {
+interface CardPropsWithLink {
   icon: React.ReactNode;
   description: React.ReactNode;
   linkHref: string;
   linkText: string;
   isDarkMode: boolean;
+  children?: never;
+  className?: string;
 }
 
-export const Card: React.FC<CardProps> = ({ icon, description, linkHref, linkText, isDarkMode }) => {
+interface CardPropsWithChildren {
+  children: React.ReactNode;
+  className?: string;
+  icon?: never;
+  description?: never;
+  linkHref?: never;
+  linkText?: never;
+  isDarkMode?: boolean;
+}
+
+type CardProps = CardPropsWithLink | CardPropsWithChildren;
+
+export const Card: React.FC<CardProps> = props => {
+  // If children prop exists, render as simple container
+  if ("children" in props && props.children) {
+    return <div className={`bg-base-100 rounded-lg shadow-lg p-6 ${props.className || ""}`}>{props.children}</div>;
+  }
+
+  // Otherwise render with link pattern
+  const { icon, description, linkHref, linkText, isDarkMode, className } = props as CardPropsWithLink;
+
   return (
     <div
       className={`relative h-full rounded-3xl border-2 border-transparent p-4 text-center flex flex-col items-center justify-evenly max-w-md ${
         isDarkMode ? "gradient-border-red" : "gradient-border-light"
-      }`}
+      } ${className || ""}`}
       style={{
         boxShadow: "0 0 0 3px transparent",
       }}
