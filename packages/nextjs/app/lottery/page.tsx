@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { NextPage } from "next";
-import { formatEther, parseEther } from "viem";
+import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import { Card } from "~~/components/Card";
 import { Address } from "~~/components/scaffold-eth";
@@ -22,45 +22,37 @@ const LotteryPage: NextPage = () => {
   // Read contract state
   const { data: entryFee } = useScaffoldReadContract({
     contractName: "lottery",
-    functionName: "get_entry_fee",
-  });
-
-  const { data: currentLotteryId } = useScaffoldReadContract({
-    contractName: "lottery",
-    functionName: "get_current_lottery_id",
+    functionName: "getEntryFee",
   });
 
   const { data: isOpen } = useScaffoldReadContract({
     contractName: "lottery",
-    functionName: "is_lottery_open",
+    functionName: "isLotteryOpen",
   });
 
   const { data: playersCount } = useScaffoldReadContract({
     contractName: "lottery",
-    functionName: "get_players_count",
+    functionName: "getPlayersCount",
   });
 
   const { data: prizePool } = useScaffoldReadContract({
     contractName: "lottery",
-    functionName: "get_prize_pool",
+    functionName: "getPrizePool",
+  });
+
+  const { data: lastWinner } = useScaffoldReadContract({
+    contractName: "lottery",
+    functionName: "getLastWinner",
   });
 
   const { data: owner } = useScaffoldReadContract({
     contractName: "lottery",
-    functionName: "owner",
-  });
-
-  // Get latest lottery round info
-  const { data: latestRound } = useScaffoldReadContract({
-    contractName: "lottery",
-    functionName: "get_lottery_round",
-    args: currentLotteryId ? [currentLotteryId - 1n] : undefined,
+    functionName: "getOwner",
   });
 
   // Write functions
   const { writeContractAsync: enterLottery, isPending: isEntering } = useScaffoldWriteContract("lottery");
   const { writeContractAsync: startDraw, isPending: isStarting } = useScaffoldWriteContract("lottery");
-  const { writeContractAsync: fundContract, isPending: isFunding } = useScaffoldWriteContract("lottery");
 
   const handleEnterLottery = async () => {
     if (!entryFee) {
@@ -70,7 +62,7 @@ const LotteryPage: NextPage = () => {
 
     try {
       await enterLottery({
-        functionName: "enter_lottery",
+        functionName: "enter",
         value: entryFee,
       });
       notification.success("Successfully entered the lottery!");
@@ -83,7 +75,7 @@ const LotteryPage: NextPage = () => {
   const handleStartDraw = async () => {
     try {
       await startDraw({
-        functionName: "start_draw",
+        functionName: "draw",
       });
       notification.success("Draw started! Waiting for VRF response...");
     } catch (error: any) {
@@ -92,20 +84,7 @@ const LotteryPage: NextPage = () => {
     }
   };
 
-  const handleFundContract = async () => {
-    try {
-      await fundContract({
-        functionName: "fund_contract",
-        value: parseEther("0.05"),
-      });
-      notification.success("Contract funded successfully!");
-    } catch (error: any) {
-      console.error("Error funding contract:", error);
-      notification.error(error.message || "Failed to fund contract");
-    }
-  };
-
-  const isOwner = connectedAddress?.toLowerCase() === owner?.toLowerCase();
+  const isOwner = connectedAddress && owner ? connectedAddress.toLowerCase() === owner.toLowerCase() : false;
 
   if (!mounted) {
     return null;
@@ -155,10 +134,6 @@ const LotteryPage: NextPage = () => {
           <Card className="mb-6">
             <h2 className="text-2xl font-bold mb-4">🎯 Current Lottery Status</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-base-200 p-4 rounded-lg">
-                <p className="text-sm opacity-70 mb-1">Lottery ID</p>
-                <p className="text-2xl font-bold">{currentLotteryId?.toString() || "0"}</p>
-              </div>
               <div className="bg-base-200 p-4 rounded-lg">
                 <p className="text-sm opacity-70 mb-1">Status</p>
                 <p className="text-2xl font-bold">{isOpen ? "🟢 Open" : "🔴 Closed"}</p>
@@ -212,14 +187,6 @@ const LotteryPage: NextPage = () => {
               <div className="space-y-4">
                 <div>
                   <p className="mb-2">
-                    <strong>Fund Contract:</strong> Add ETH to contract for VRF payment fees
-                  </p>
-                  <button className="btn btn-secondary" onClick={handleFundContract} disabled={isFunding}>
-                    {isFunding ? <span className="loading loading-spinner"></span> : "💰 Fund Contract (0.05 ETH)"}
-                  </button>
-                </div>
-                <div>
-                  <p className="mb-2">
                     <strong>Start Draw:</strong> Request random number from Chainlink VRF to select winner
                   </p>
                   <button
@@ -238,31 +205,13 @@ const LotteryPage: NextPage = () => {
           )}
 
           {/* Latest Winner */}
-          {latestRound && latestRound[6] && (
+          {lastWinner && lastWinner !== "0x0000000000000000000000000000000000000000" && (
             <Card className="mb-6 bg-success/10 border-2 border-success">
               <h2 className="text-2xl font-bold mb-4">🏆 Latest Winner</h2>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold">Lottery ID:</span>
-                  <span className="text-xl">{latestRound[0]?.toString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
                   <span className="font-semibold">Winner:</span>
-                  <Address address={latestRound[2]} />
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold">Prize:</span>
-                  <span className="text-2xl font-bold text-success">
-                    {latestRound[1] ? `${formatEther(latestRound[1])} ETH` : "0 ETH"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold">Players:</span>
-                  <span>{latestRound[4]?.toString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold">Random Number:</span>
-                  <span className="text-xs font-mono">{latestRound[3]?.toString().slice(0, 20)}...</span>
+                  <Address address={lastWinner} />
                 </div>
               </div>
             </Card>
